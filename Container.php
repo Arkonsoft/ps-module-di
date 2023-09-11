@@ -24,7 +24,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Container
+class Container implements ContainerInterface
 {
     private static $services = [];
 
