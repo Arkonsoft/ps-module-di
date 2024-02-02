@@ -34,10 +34,10 @@ class Container implements ContainerInterface
      *
      * @var string name The name of the service to get.
      *
-     * @return ServiceInterface A new instance of the class that is registered with the service
+     * @return mixed 'A new instance of the class that is registered with the service
      * manager.
      */
-    public function get(string $name): ServiceInterface
+    public function get(string $name)
     {
         if (empty($name)) {
             if (_PS_MODE_DEV_) {

@@ -24,6 +24,6 @@ if (!defined('_PS_VERSION_')) {
 
 interface ContainerInterface
 {
-    public function get(string $name): ServiceInterface;
+    public function get(string $name);
     public function set(string $name, string $class, array $params = []): bool;
 }
