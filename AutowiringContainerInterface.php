@@ -22,30 +22,26 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-interface AutowiringContainerInterface 
+interface AutowiringContainerInterface
 {
     /**
-     * Rejestruje serwis w kontenerze
-     * 
-     * @param string $id Identyfikator serwisu
-     * @param mixed $concrete Definicja serwisu (klasa, obiekt, callback lub wartość)
+     * @template T
+     * @param class-string<T>|string $id
+     * @param mixed $concrete
      * @return void
      */
     public function set(string $id, $concrete);
 
     /**
-     * Pobiera serwis z kontenera
-     * 
-     * @param string $id Identyfikator serwisu
-     * @throws ServiceNotFoundException gdy serwis nie istnieje
-     * @return mixed
+     * @template T
+     * @param class-string<T>|string $id
+     * @return T|mixed
+     * @throws ServiceNotFoundException
      */
     public function get(string $id);
 
     /**
-     * Sprawdza czy serwis istnieje w kontenerze
-     * 
-     * @param string $id Identyfikator serwisu
+     * @param string $id
      * @return bool
      */
     public function has(string $id): bool;
