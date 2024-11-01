@@ -27,11 +27,23 @@ class AutowiringContainer implements AutowiringContainerInterface
     private $services = [];
     private $instances = [];
 
+    /**
+     * @template T
+     * @param class-string<T>|string $id
+     * @param mixed $concrete
+     * @return void
+     */
     public function set(string $id, $concrete)
     {
         $this->services[$id] = $concrete;
     }
 
+    /**
+     * @template T
+     * @param class-string<T>|string $id
+     * @return T|mixed
+     * @throws ServiceNotFoundException
+     */
     public function get(string $id)
     {
         if (isset($this->instances[$id])) {
@@ -53,11 +65,20 @@ class AutowiringContainer implements AutowiringContainerInterface
         return $instance;
     }
 
+    /**
+     * @param string $id
+     * @return bool
+     */
     public function has(string $id): bool
     {
         return isset($this->services[$id]);
     }
 
+    /**
+     * @template T
+     * @param mixed|callable|class-string<T> $concrete
+     * @return T|mixed
+     */
     private function resolve($concrete)
     {
         if (is_callable($concrete)) {
@@ -75,6 +96,12 @@ class AutowiringContainer implements AutowiringContainerInterface
         return $concrete;
     }
 
+    /**
+     * @template T
+     * @param class-string<T> $className
+     * @return T
+     * @throws ServiceNotFoundException
+     */
     private function resolveClass(string $className)
     {
         $reflectionClass = new \ReflectionClass($className);
