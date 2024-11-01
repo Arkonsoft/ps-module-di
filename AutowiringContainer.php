@@ -18,6 +18,8 @@
 
 namespace Arkonsoft\PsModule\DI;
 
+use Arkonsoft\PsModule\DI\Exception\ServiceNotFoundException;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
