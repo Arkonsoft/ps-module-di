@@ -33,6 +33,14 @@ interface AutowiringContainerInterface
     public function set(string $id, $concrete);
 
     /**
+     * Sets a configuration parameter
+     * 
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setParameter(string $name, $value): void;
+
+    /**
      * @template T
      * @param class-string<T>|string $id
      * @return T|mixed

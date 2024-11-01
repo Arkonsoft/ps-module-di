@@ -14,7 +14,7 @@
  * @copyright 2024 Arkonsoft
  */
 
- declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Arkonsoft\PsModule\DI;
 
@@ -28,6 +28,7 @@ class AutowiringContainer implements AutowiringContainerInterface
 {
     private $services = [];
     private $instances = [];
+    private $parameters = [];
 
     /**
      * @template T
@@ -41,6 +42,17 @@ class AutowiringContainer implements AutowiringContainerInterface
     }
 
     /**
+     * Sets a configuration parameter
+     * 
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setParameter(string $name, $value): void
+    {
+        $this->parameters[$name] = $value;
+    }
+
+    /**
      * @template T
      * @param class-string<T>|string $id
      * @return T|mixed
@@ -48,6 +60,15 @@ class AutowiringContainer implements AutowiringContainerInterface
      */
     public function get(string $id)
     {
+        // Sprawdź czy to parametr
+        if (strpos($id, '%') === 0 && substr($id, -1) === '%') {
+            $paramName = trim($id, '%');
+            if (!isset($this->parameters[$paramName])) {
+                throw new ServiceNotFoundException("Parameter $paramName not found");
+            }
+            return $this->parameters[$paramName];
+        }
+
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
         }
@@ -91,8 +112,15 @@ class AutowiringContainer implements AutowiringContainerInterface
             return $concrete;
         }
 
-        if (is_string($concrete) && class_exists($concrete)) {
-            return $this->resolveClass($concrete);
+        if (is_string($concrete)) {
+            // Sprawdź czy to parametr
+            if (strpos($concrete, '%') === 0 && substr($concrete, -1) === '%') {
+                return $this->get($concrete);
+            }
+
+            if (class_exists($concrete)) {
+                return $this->resolveClass($concrete);
+            }
         }
 
         return $concrete;
@@ -117,6 +145,22 @@ class AutowiringContainer implements AutowiringContainerInterface
         $dependencies = [];
 
         foreach ($parameters as $parameter) {
+            // Sprawdź czy parametr ma adnotację o parametrze konfiguracyjnym
+            $parameterName = $parameter->getName();
+            $docComment = $constructor->getDocComment();
+            
+            if ($docComment !== false) {
+                preg_match('/@param\s+[^\s]+\s+\$' . $parameterName . '\s+%([^%]+)%/', $docComment, $matches);
+                if (!empty($matches[1])) {
+                    if (!isset($this->parameters[$matches[1]])) {
+                        throw new ServiceNotFoundException("Parameter {$matches[1]} not found for {$className}::\${$parameterName}");
+                    }
+                    $dependencies[] = $this->parameters[$matches[1]];
+                    continue;
+                }
+            }
+
+            // Standardowa obsługa zależności
             if ($parameter->getClass() === null) {
                 if ($parameter->isDefaultValueAvailable()) {
                     $dependencies[] = $parameter->getDefaultValue();
