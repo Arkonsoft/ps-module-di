@@ -37,8 +37,9 @@ interface AutowiringContainerInterface
      * 
      * @param string $name
      * @param mixed $value
+     * @return void
      */
-    public function setParameter(string $name, $value): void;
+    public function setParameter(string $name, $value);
 
     /**
      * @template T
