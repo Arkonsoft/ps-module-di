@@ -146,7 +146,6 @@ class AutowiringContainer implements AutowiringContainerInterface
         $dependencies = [];
 
         foreach ($parameters as $parameter) {
-            // Sprawdź czy parametr ma adnotację o parametrze konfiguracyjnym
             $parameterName = $parameter->getName();
             $docComment = $constructor->getDocComment();
             
@@ -161,8 +160,15 @@ class AutowiringContainer implements AutowiringContainerInterface
                 }
             }
 
-            // Standardowa obsługa zależności
-            if ($parameter->getClass() === null) {
+            if (method_exists($parameter, 'getType')) {
+                $parameterType = $parameter->getType();
+                $isClass = $parameterType instanceof \ReflectionNamedType && !$parameterType->isBuiltin();
+            } else {
+                // PHP 7.0 compatibility
+                $isClass = $parameter->getClass() !== null;
+            }
+
+            if (!$isClass) {
                 if ($parameter->isDefaultValueAvailable()) {
                     $dependencies[] = $parameter->getDefaultValue();
                     continue;
@@ -172,7 +178,10 @@ class AutowiringContainer implements AutowiringContainerInterface
                 );
             }
 
-            $dependencyClassName = $parameter->getClass()->getName();
+            $dependencyClassName = method_exists($parameter, 'getType') 
+                ? $parameter->getType()->getName()
+                : $parameter->getClass()->getName();
+
             $dependencies[] = $this->get($dependencyClassName);
         }
 
