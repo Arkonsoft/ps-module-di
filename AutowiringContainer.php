@@ -160,11 +160,10 @@ class AutowiringContainer implements AutowiringContainerInterface
                 }
             }
 
-            if (method_exists($parameter, 'getType')) {
+            if (PHP_VERSION_ID >= 70100) {
                 $parameterType = $parameter->getType();
                 $isClass = $parameterType instanceof \ReflectionNamedType && !$parameterType->isBuiltin();
             } else {
-                // PHP 7.0 compatibility
                 $isClass = $parameter->getClass() !== null;
             }
 
@@ -178,9 +177,11 @@ class AutowiringContainer implements AutowiringContainerInterface
                 );
             }
 
-            $dependencyClassName = method_exists($parameter, 'getType') 
-                ? $parameter->getType()->getName()
-                : $parameter->getClass()->getName();
+            if (PHP_VERSION_ID >= 70100) {
+                $dependencyClassName = $parameter->getType()->getName();
+            } else {
+                $dependencyClassName = $parameter->getClass()->getName();
+            }
 
             $dependencies[] = $this->get($dependencyClassName);
         }
